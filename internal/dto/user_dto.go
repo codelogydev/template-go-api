@@ -6,6 +6,11 @@ type UserResponse struct {
 	Email string `json:"email"`
 }
 
+type LoginResponse struct {
+	Token string       `json:"token"`
+	User  UserResponse `json:"user"`
+}
+
 type CreateUserRequest struct {
 	Name     string `json:"name"     binding:"required"`
 	Email    string `json:"email"    binding:"required,email"`

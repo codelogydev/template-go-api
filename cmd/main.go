@@ -16,6 +16,7 @@ import (
 	"github.com/codelogydev/core-go/logger"
 	"github.com/codelogydev/core-go/mailer"
 	coreMiddleware "github.com/codelogydev/core-go/middleware"
+	"github.com/codelogydev/core-go/oauth"
 	"github.com/codelogydev/core-go/storage"
 
 	"github.com/codelogydev/template-go-api/internal/database"
@@ -61,9 +62,16 @@ func main() {
 		})
 	}
 
+	oauth.InitGoogle(
+		os.Getenv("GOOGLE_CLIENT_ID"),
+		os.Getenv("GOOGLE_CLIENT_SECRET"),
+		os.Getenv("GOOGLE_REDIRECT_URL"),
+	)
+
 	userRepo := repository.NewUserRepository(database.DB)
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
+	authHandler := handler.NewAuthHandler(userService)
 
 	r := gin.New()
 	r.Use(coreMiddleware.Recovery())
@@ -71,6 +79,9 @@ func main() {
 
 	r.GET("/", handler.HealthCheck)
 	r.GET("/users", userHandler.GetUsers)
+
+	r.GET("/auth/google", authHandler.GoogleLogin)
+	r.GET("/auth/google/callback", authHandler.GoogleCallback)
 
 	srv := &http.Server{
 		Addr:    ":8080",

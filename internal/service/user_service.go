@@ -1,6 +1,10 @@
 package service
 
 import (
+	"context"
+	"errors"
+
+	"github.com/codelogydev/core-go/auth"
 	"github.com/codelogydev/template-go-api/internal/dto"
 	"github.com/codelogydev/template-go-api/internal/model"
 	"github.com/codelogydev/template-go-api/internal/repository"
@@ -8,6 +12,7 @@ import (
 
 type UserService interface {
 	GetAllUsers() ([]dto.UserResponse, error)
+	LoginWithGoogle(googleID, email, name string) (*dto.LoginResponse, error)
 }
 
 type userService struct {
@@ -23,8 +28,31 @@ func (s *userService) GetAllUsers() ([]dto.UserResponse, error) {
 	if err != nil {
 		return nil, err
 	}
-
 	return toUserResponseList(users), nil
+}
+
+func (s *userService) LoginWithGoogle(googleID, email, name string) (*dto.LoginResponse, error) {
+	ctx := context.Background()
+
+	user, err := s.repo.FindByEmail(ctx, email)
+	if errors.Is(err, repository.ErrNotFound) {
+		user, err = s.repo.Create(ctx, name, email)
+		if err != nil {
+			return nil, err
+		}
+	} else if err != nil {
+		return nil, err
+	}
+
+	token, err := auth.GenerateToken(user.ID)
+	if err != nil {
+		return nil, err
+	}
+
+	return &dto.LoginResponse{
+		Token: token,
+		User:  toUserResponse(*user),
+	}, nil
 }
 
 func toUserResponse(u model.User) dto.UserResponse {
@@ -42,3 +70,4 @@ func toUserResponseList(users []model.User) []dto.UserResponse {
 	}
 	return result
 }
+
