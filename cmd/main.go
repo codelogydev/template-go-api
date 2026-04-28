@@ -15,6 +15,7 @@ import (
 	"github.com/codelogydev/core-go/cache"
 	"github.com/codelogydev/core-go/logger"
 	coreMiddleware "github.com/codelogydev/core-go/middleware"
+	"github.com/codelogydev/core-go/storage"
 
 	"github.com/codelogydev/template-go-api/internal/database"
 	"github.com/codelogydev/template-go-api/internal/handler"
@@ -35,6 +36,17 @@ func main() {
 	if redisURL := os.Getenv("REDIS_URL"); redisURL != "" {
 		if err := cache.Init(redisURL); err != nil {
 			logger.Log.Warn("redis unavailable, cache disabled", zap.Error(err))
+		}
+	}
+
+	if endpoint := os.Getenv("STORAGE_ENDPOINT"); endpoint != "" {
+		if err := storage.Init(
+			endpoint,
+			os.Getenv("STORAGE_ACCESS_KEY"),
+			os.Getenv("STORAGE_SECRET_KEY"),
+			os.Getenv("STORAGE_USE_SSL") == "true",
+		); err != nil {
+			logger.Log.Warn("storage unavailable", zap.Error(err))
 		}
 	}
 
