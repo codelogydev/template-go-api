@@ -1,13 +1,20 @@
 package main
 
 import (
-	"log"
+	"context"
+	"net/http"
+	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
+	"go.uber.org/zap"
 
-	coreMiddleware "github.com/codelogydev/core-go/middleware"
 	"github.com/codelogydev/core-go/logger"
+	coreMiddleware "github.com/codelogydev/core-go/middleware"
+
 	"github.com/codelogydev/template-go-api/internal/database"
 	"github.com/codelogydev/template-go-api/internal/handler"
 	"github.com/codelogydev/template-go-api/internal/repository"
@@ -20,9 +27,8 @@ func main() {
 	logger.Init()
 	defer logger.Log.Sync()
 
-	err := database.Connect()
-	if err != nil {
-		log.Fatal(err)
+	if err := database.Connect(); err != nil {
+		logger.Log.Fatal("failed to connect to database", zap.Error(err))
 	}
 
 	userRepo := repository.NewUserRepository(database.DB)
@@ -36,5 +42,30 @@ func main() {
 	r.GET("/", handler.HealthCheck)
 	r.GET("/users", userHandler.GetUsers)
 
-	r.Run(":8080")
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
+
+	go func() {
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			logger.Log.Fatal("server failed to start", zap.Error(err))
+		}
+	}()
+
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, syscall.SIGINT, syscall.SIGTERM)
+	<-quit
+
+	logger.Log.Info("shutting down server...")
+
+	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctx); err != nil {
+		logger.Log.Fatal("server forced to shutdown", zap.Error(err))
+	}
+
+	logger.Log.Info("server exited cleanly")
 }
+

@@ -31,9 +31,16 @@ func (r *userRepository) GetAll() ([]model.User, error) {
 
 	for rows.Next() {
 		var u model.User
-		rows.Scan(&u.ID, &u.Name, &u.Email)
+		if err := rows.Scan(&u.ID, &u.Name, &u.Email); err != nil {
+			return nil, err
+		}
 		users = append(users, u)
+	}
+
+	if err := rows.Err(); err != nil {
+		return nil, err
 	}
 
 	return users, nil
 }
+
