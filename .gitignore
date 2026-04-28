@@ -1,0 +1,41 @@
+# Binaries
+/bin/
+/build/
+*.exe
+*.exe~
+*.dll
+*.so
+*.dylib
+
+# Go build
+*.test
+*.out
+
+# Dependency directories
+/vendor/
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Env files (PENTING)
+.env
+
+# Logs
+*.log
+
+# Coverage
+coverage.out
+
+# Temp
+tmp/
+temp/
+
+# Docker (optional)
+docker-data/
