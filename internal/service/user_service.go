@@ -27,8 +27,6 @@ func (s *userService) GetAllUsers() ([]dto.UserResponse, error) {
 	return toUserResponseList(users), nil
 }
 
-// toUserResponse memetakan model.User ke dto.UserResponse.
-// Ini memastikan field sensitif (PasswordHash, dll) tidak pernah keluar ke client.
 func toUserResponse(u model.User) dto.UserResponse {
 	return dto.UserResponse{
 		ID:    u.ID,
