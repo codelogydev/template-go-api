@@ -14,6 +14,7 @@ import (
 
 	"github.com/codelogydev/core-go/cache"
 	"github.com/codelogydev/core-go/logger"
+	"github.com/codelogydev/core-go/mailer"
 	coreMiddleware "github.com/codelogydev/core-go/middleware"
 	"github.com/codelogydev/core-go/storage"
 
@@ -48,6 +49,16 @@ func main() {
 		); err != nil {
 			logger.Log.Warn("storage unavailable", zap.Error(err))
 		}
+	}
+
+	if mailHost := os.Getenv("MAIL_HOST"); mailHost != "" {
+		mailer.Init(mailer.Config{
+			Host:     mailHost,
+			Port:     587,
+			Username: os.Getenv("MAIL_USERNAME"),
+			Password: os.Getenv("MAIL_PASSWORD"),
+			From:     os.Getenv("MAIL_FROM"),
+		})
 	}
 
 	userRepo := repository.NewUserRepository(database.DB)

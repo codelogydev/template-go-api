@@ -3,7 +3,7 @@ module github.com/codelogydev/template-go-api
 go 1.26.1
 
 require (
-	github.com/codelogydev/core-go v1.0.4
+	github.com/codelogydev/core-go v1.0.5
 	github.com/gin-gonic/gin v1.12.0
 	github.com/jackc/pgx/v5 v5.5.4
 	github.com/joho/godotenv v1.5.1
@@ -50,6 +50,7 @@ require (
 	github.com/tinylib/msgp v1.6.1 // indirect
 	github.com/twitchyliquid64/golang-asm v0.15.1 // indirect
 	github.com/ugorji/go/codec v1.3.1 // indirect
+	github.com/wneessen/go-mail v0.7.2 // indirect
 	github.com/zeebo/xxh3 v1.1.0 // indirect
 	go.mongodb.org/mongo-driver/v2 v2.5.0 // indirect
 	go.uber.org/atomic v1.11.0 // indirect
