@@ -20,7 +20,6 @@ func main() {
 		log.Fatal(err)
 	}
 
-	// Dependency injection: DB → repo → service → handler
 	userRepo := repository.NewUserRepository(database.DB)
 	userService := service.NewUserService(userRepo)
 	userHandler := handler.NewUserHandler(userService)
