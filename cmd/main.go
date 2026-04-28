@@ -12,6 +12,7 @@ import (
 	"github.com/joho/godotenv"
 	"go.uber.org/zap"
 
+	"github.com/codelogydev/core-go/cache"
 	"github.com/codelogydev/core-go/logger"
 	coreMiddleware "github.com/codelogydev/core-go/middleware"
 
@@ -29,6 +30,12 @@ func main() {
 
 	if err := database.Connect(); err != nil {
 		logger.Log.Fatal("failed to connect to database", zap.Error(err))
+	}
+
+	if redisURL := os.Getenv("REDIS_URL"); redisURL != "" {
+		if err := cache.Init(redisURL); err != nil {
+			logger.Log.Warn("redis unavailable, cache disabled", zap.Error(err))
+		}
 	}
 
 	userRepo := repository.NewUserRepository(database.DB)
